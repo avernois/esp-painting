@@ -7,10 +7,16 @@ local clock = 7
 local button = 1
 local alarm = 0
 
-local protocol = require("protocol")
-local server = require("server")
 
-server.start(8080, protocol)
+
+if (server ~= nil)
+then
+    server.stop()
+    server = nil
+end
+server = require("server")
+
+server.start(8080, require("protocol"))
 
 local light = require("light_paint")
 light.init(data, clock, alarm)
@@ -38,7 +44,5 @@ gpio_trig(button, "down" or "up", triggered_start)
 
 light_paint=nil
 package.loaded["light_paint"] = nil
-server = nil
 package.loaded["server"] = nil
 package.loaded["protocol"] = nil
-protocol=nil

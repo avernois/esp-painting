@@ -1,39 +1,42 @@
-if (server ~=nil)
-then
-    print("closing server")
-    server:close()
+local net = net
+local file = file
+local print = print
+
+local M = {}
+if setfenv then
+    setfenv(1, M) -- for 5.1
+else
+    _ENV = M -- for 5.2
 end
 
-line = 0
+local server= nil
+
+local protocol={}
 
 
-server = net.createServer(net.TCP, 5)
-print("server created", server)
-function serve(socket)
+local function serve(socket)
     socket:on("connection", function(socket)
         print("receive connection")
     end)
-    socket:on("receive", function (socket, payload)
-        if (payload == "clean")
-        then
-            file.remove("hex.txt")
-            print("clean file")
-        else 
-            file.open("hex.txt", "a+")
-            file.write(payload)
-            file.close()
-        end
-    end)    
+    socket:on("receive", protocol.receive)    
 
-    socket:on("disconnection", function (socket)
-        print("disconnected, closing file")
-        file.close()
-    end)
+    socket:on("disconnection", protocol.disconnect)
 end
 
 
-server:listen(8080, serve)
+function start(port, com_protocol)
+    protocol = com_protocol
+    server = net.createServer(net.TCP, 5)
+    server:listen(port, serve)
+    print("server created and listening on port: ".. port)
+end
 
-print(wifi.sta.getip())
+function stop()
+    if (server ~=nil)
+    then
+        print("closing server")
+        server:close()
+    end
+end
 
-
+return M

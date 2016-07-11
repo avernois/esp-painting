@@ -16,7 +16,6 @@ end
 
 local data = 6
 local clock = 7
-
 local alarm = 0
 
 
@@ -46,7 +45,6 @@ local function print_frame()
         line = string_gsub(line, "\n", "")    
         print_line(line)
      else
-        file_close()
         stop()
      end
 end
@@ -58,13 +56,10 @@ function init(data_pin, clock_pin, alarm_id)
     gpio_mode(data, gpio_OUTPUT) 
     gpio_mode(clock, gpio_OUTPUT)
 
-    leds_abgr = string_rep(string_char(1, 255, 0, 0), 112)
-    apawrite(data, clock, leds_abgr)
     off()
 end
 
 function print_file(filename, delay)
-    off()
     ret = file_open(filename, "r")
     if(not ret)
     then
@@ -75,6 +70,7 @@ function print_file(filename, delay)
 end
 
 function stop()
+    file_close()
     tmr.stop(alarm)
     off()
 end

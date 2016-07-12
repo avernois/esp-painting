@@ -18,8 +18,9 @@ local data = 6
 local clock = 7
 local alarm = 0
 
+local callback = nil
 
-local function off()
+function off()
     leds_abgr = string_rep(string_char(0, 0, 0, 0), 112)
     apawrite(data, clock, leds_abgr)
 end
@@ -45,7 +46,7 @@ local function print_frame()
         line = string_gsub(line, "\n", "")    
         print_line(line)
      else
-        stop()
+        stop(callback)
      end
 end
 
@@ -59,7 +60,8 @@ function init(data_pin, clock_pin, alarm_id)
     off()
 end
 
-function print_file(filename, delay)
+function print_file(filename, delay, end_callback)
+    callback= end_callback or off
     ret = file_open(filename, "r")
     if(not ret)
     then
@@ -69,10 +71,15 @@ function print_file(filename, delay)
     current = 1
 end
 
-function stop()
+function stop(end_callback)
     file_close()
     tmr.stop(alarm)
-    off()
+    if (end_callback ~= nil)
+    then
+        end_callback()
+    else
+        off()
+    end
 end
 
 return M

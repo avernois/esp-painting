@@ -7,8 +7,6 @@ local clock = 7
 local button = 1
 local alarm = 0
 
-
-
 if (server ~= nil)
 then
     server.stop()
@@ -21,46 +19,28 @@ server.start(8080, require("protocol"))
 local light = require("light_paint")
 light.init(data, clock, alarm)
 
-gpio.mode(button, gpio.INPUT, gpio.PULLUP)
+switch = require("two_states_switch")
 
-
-local function button_trigger_start()
-    gpio_trig(button, "down", triggered_start)
+local function on(level)
+    --print("starting")
+    light.print_file("hex.txt", 30, 
+        function ()
+            switch.as_off()
+        end)
 end
 
-local function button_trigger_stop()
-    gpio_trig(button, "down", triggered_stop)
+local function off(level)
+    light.stop(
+        function () 
+            light.off()
+        end)
 end
 
+switch.init(1, on, off)
+switch.activate()
 
-function triggered_stop(level)
-    if (level == 0 and gpio_read(button) == 0)
-    then
-        print("stopping")
-        light.stop(
-            function () 
-                light.off()
-                button_trigger_start()
-            end)
-        
-    end
-end
 
-function triggered_start(level)
-    if (level == 0 and gpio_read(button) == 0)
-    then
-        print("starting")
-        light.print_file("hex.txt", 30, 
-            function () 
-                light.off()
-                button_trigger_start()
-            end)
-        button_trigger_stop()
-    end 
-end
-
-button_trigger_start()
-
+package.loaded["two_states_switch"] = nil
 package.loaded["light_paint"] = nil
 package.loaded["server"] = nil
 package.loaded["protocol"] = nil

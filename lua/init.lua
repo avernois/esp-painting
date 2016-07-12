@@ -6,7 +6,7 @@ function startup()
         return
         end
     print('in startup')
-    dofile("do.lua")
+    dofile("main.lua")
     end
 
 abort = false

@@ -21,11 +21,14 @@ light.init(data, clock, alarm)
 
 switch = require("two_states_switch")
 
+delay = 30
+
 local function on(level)
     --print("starting")
-    light.print_file("hex.txt", 30, 
+    light.print_file("hex.txt", delay, 
         function ()
             switch.as_off()
+            light.off()
         end)
 end
 
